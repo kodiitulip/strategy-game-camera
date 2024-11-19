@@ -1,0 +1,61 @@
+[gd_scene load_steps=8 format=3 uid="uid://cogjkhsuto2fn"]
+
+[ext_resource type="Shader" path="res://assets/shaders/grid.gdshader" id="1_7ug7m"]
+[ext_resource type="PackedScene" uid="uid://jg04b088eu34" path="res://scenes/camera/camera.tscn" id="1_ycend"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_aad6d"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_gvbgu"]
+sky_material = SubResource("ProceduralSkyMaterial_aad6d")
+
+[sub_resource type="Environment" id="Environment_rvnm4"]
+background_mode = 2
+sky = SubResource("Sky_gvbgu")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_n8fwu"]
+size = Vector2(2000, 2000)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5jgov"]
+render_priority = 0
+shader = ExtResource("1_7ug7m")
+shader_parameter/subdivisions = 32.0
+shader_parameter/grid_width = 0.02
+shader_parameter/background_color = Color(0.0962048, 0.0962047, 0.0962047, 1)
+shader_parameter/background_color_two = Color(0.265361, 0.265361, 0.265361, 1)
+shader_parameter/grid_color = Color(0.5, 0.5, 0.5, 1)
+shader_parameter/dashed_scale_x = 0.4
+shader_parameter/dashed_scale_y = 0.4
+shader_parameter/dashed_count_x = 4.0
+shader_parameter/dashed_count_y = 4.0
+shader_parameter/point_width = 0.021
+shader_parameter/point_color = Color(0.5, 0.5, 0.5, 1)
+shader_parameter/point_scale_x = 0.05
+shader_parameter/point_scale_y = 0.05
+shader_parameter/inside_width = 0.01
+shader_parameter/inside_subdivisions = 6.0
+shader_parameter/inside_color = Color(0.4, 0.4, 0.4, 1)
+shader_parameter/in_dashed_scale_x = 0.3
+shader_parameter/in_dashed_scale_y = 0.3
+shader_parameter/in_dashed_count_x = 6.0
+shader_parameter/in_dashed_count_y = 6.0
+
+[node name="Main" type="Node3D"]
+
+[node name="Enviroment" type="Node3D" parent="."]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Enviroment"]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Enviroment"]
+environment = SubResource("Environment_rvnm4")
+
+[node name="CSGMesh3D" type="CSGMesh3D" parent="."]
+use_collision = true
+mesh = SubResource("PlaneMesh_n8fwu")
+material = SubResource("ShaderMaterial_5jgov")
+
+[node name="CameraRig" parent="." instance=ExtResource("1_ycend")]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 10, 0)
