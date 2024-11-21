@@ -1,16 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://jg04b088eu34"]
+[gd_scene load_steps=2 format=3 uid="uid://jg04b088eu34"]
 
 [ext_resource type="Script" path="res://scenes/camera/camera.gd" id="1_w8t06"]
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_qjk31"]
 
 [node name="CameraRig" type="Node3D"]
 transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 10, 0)
 script = ExtResource("1_w8t06")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-1, 6.18173e-08, -6.18173e-08, 0, 0.707107, 0.707107, 8.74228e-08, 0.707107, -0.707107, 0, 150, -150)
-fov = 10.0
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+transform = Transform3D(-1, -6.18172e-08, 6.18172e-08, 0, 0.707107, 0.707107, -8.74228e-08, 0.707107, -0.707107, 0, 0, 0)
+collision_mask = 0
+spring_length = 20.0
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-mesh = SubResource("CapsuleMesh_qjk31")
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+transform = Transform3D(0.999999, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+fov = 10.0
