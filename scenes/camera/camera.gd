@@ -1,6 +1,7 @@
 class_name CameraController
 extends Node3D
 
+#region Variables
 @export_group("Speed", "speed_")
 @export var speed_normal: float = 0.5
 @export var speed_fast: float = 3.0
@@ -27,6 +28,7 @@ var drag_current_pos: Vector3
 
 @onready var camera: Camera3D = $SpringArm3D/Camera3D
 @onready var camera_arm: SpringArm3D = $SpringArm3D
+#endregion
 
 
 func _ready() -> void:
@@ -111,6 +113,12 @@ func _handle_rotation_input() -> void:
 
 
 func _handle_movement_input() -> void:
+	if Input.is_action_pressed(&"rotate_cam_down") or \
+			Input.is_action_pressed(&"rotate_cam_up") or \
+			Input.is_action_pressed(&"rotate_cam_left") or \
+			Input.is_action_pressed(&"rotate_cam_right"):
+		return
+
 	var movement_speed: float = speed_fast \
 			if Input.is_action_pressed(&"fast_cam_moviment") \
 			else speed_normal
