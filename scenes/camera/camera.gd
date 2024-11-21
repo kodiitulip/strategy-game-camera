@@ -8,11 +8,19 @@ extends Node3D
 @export var zoom_amount: float = 10.0
 @export var zoom_max: float = 200.0
 @export var zoom_min: float = 50.0
-@export var movement_time: float = 5.0
+@export_group("Rotation","rotation_")
 @export var rotation_amount: float = 2.0
+@export_range(-180,180,0.001,"degrees") var rotation_vertical_max: float = -5
+@export_range(-180,180,0.001,"degrees") var rotation_vertical_min: float = -80
+@export_group("Inverted","inverted_")
+@export var inverted_y_axis: bool = false
+@export var inverted_x_axis: bool = false
+@export var movement_time: float = 5.0
+@export var ray_length: float = 3000.0
 
 var new_position: Vector3
 var new_rotation: Quaternion
+var new_v_rotation: float
 var new_zoom: float
 var drag_start_pos: Vector3
 var drag_current_pos: Vector3
@@ -24,6 +32,7 @@ var drag_current_pos: Vector3
 func _ready() -> void:
 	new_position = global_position
 	new_rotation = Quaternion(transform.basis)
+	new_v_rotation = camera_arm.rotation_degrees.x
 	new_zoom = camera_arm.spring_length
 
 
@@ -34,13 +43,14 @@ func _process(delta: float) -> void:
 	_handle_movement_mouse_input()
 
 	new_zoom = clampf(new_zoom, zoom_min, zoom_max)
-	#new_position.y = 10.0
 
 	global_position = global_position.lerp(new_position, delta * movement_time)
 	transform.basis = transform.basis.slerp(Basis(new_rotation.normalized()),
 		delta * movement_time)
 	camera_arm.spring_length = lerpf(camera_arm.spring_length,
 		new_zoom, delta * movement_time)
+	camera_arm.rotation_degrees.x = lerpf(
+		camera_arm.rotation_degrees.x, new_v_rotation, delta * movement_time)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -53,28 +63,35 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_rotation_mouse_input(event as InputEventMouseMotion)
 
 
-func _cast_ray_from_cam(cam: Camera3D, ray_length: float) -> Variant:
+func _cast_ray_from_cam(cam: Camera3D, ray_len: float) -> Variant:
 	var plane: Plane = Plane(Vector3.UP).normalized()
 	var mouse_pos: Vector2 = get_viewport().get_mouse_position()
 	var origin: Vector3 = cam.project_ray_origin(mouse_pos)
-	var end: Vector3 = origin + cam.project_ray_normal(mouse_pos) * ray_length
+	var end: Vector3 = origin + cam.project_ray_normal(mouse_pos) * ray_len
 	return plane.intersects_segment(origin, end)
 
 
 func _handle_rotation_mouse_input(event: InputEventMouseMotion) -> void:
 	if not Input.is_action_pressed(&"rotate_cam_mouse"):
 		return
-	var axis: float = clampf(event.relative.x, -2.5, 2.5)
-	new_rotation *= Quaternion(Vector3.UP, deg_to_rad(axis * rotation_amount))
+	var axis: float = event.relative.x * 0.3
+	var axis_x: float = -event.relative.y * 0.3
+	if inverted_x_axis:
+		axis = -axis
+	if inverted_y_axis:
+		axis_x = -axis_x
+	new_rotation *= Quaternion(Vector3.UP, deg_to_rad(axis))
+	new_v_rotation = clampf(new_v_rotation + axis_x,
+		rotation_vertical_min, rotation_vertical_max)
 
 
 func _handle_movement_mouse_input() -> void:
 	if Input.is_action_just_pressed(&"move_cam_mouse"):
-		var pos: Variant = _cast_ray_from_cam(camera, new_zoom * 2)
+		var pos: Variant = _cast_ray_from_cam(camera, ray_length)
 		if pos:
 			drag_start_pos = pos
 	if Input.is_action_pressed(&"move_cam_mouse"):
-		var pos: Variant = _cast_ray_from_cam(camera, new_zoom * 2)
+		var pos: Variant = _cast_ray_from_cam(camera, ray_length)
 		if pos:
 			drag_current_pos = pos
 		new_position = global_position + drag_start_pos - drag_current_pos
@@ -86,8 +103,11 @@ func _handle_zoom_input() -> void:
 
 
 func _handle_rotation_input() -> void:
-	var axis: float = Input.get_axis(&"rotate_cam_right", &"rotate_cam_left")
+	var axis: float = Input.get_axis(&"rotate_cam_left", &"rotate_cam_right")
+	var axis_x: float = Input.get_axis(&"rotate_cam_up", &"rotate_cam_down")
 	new_rotation *= Quaternion(Vector3.UP, deg_to_rad(axis * rotation_amount))
+	new_v_rotation = clampf(new_v_rotation + axis_x * rotation_amount,
+		rotation_vertical_min, rotation_vertical_max)
 
 
 func _handle_movement_input() -> void:

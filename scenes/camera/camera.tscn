@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/camera/camera.gd" id="1_w8t06"]
 
 [node name="CameraRig" type="Node3D"]
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 10, 0)
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0)
 script = ExtResource("1_w8t06")
 
 [node name="SpringArm3D" type="SpringArm3D" parent="."]
